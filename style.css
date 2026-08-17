@@ -680,6 +680,8 @@ img {
   left: 50%;
   transform: translate(-50%);
   width: 120%;
+  /* never wider than the column it glows behind, or it pans the page on 320px screens */
+  max-width: 100%;
   height: 90%;
   background: radial-gradient(circle, rgba(56, 189, 248, 0.2), rgba(129, 140, 248, 0.15), transparent 70%);
   filter: blur(50px);
@@ -2533,7 +2535,9 @@ img {
 
 .contact-grid {
   display: grid;
-  grid-template-columns: 1fr 1.15fr;
+  /* minmax(0, …) — without it the nowrap LinkedIn/e-mail lines set a min-content
+     floor that blows the column past the container on narrow screens */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
   gap: var(--spacing-xl);
   align-items: start;
 }
@@ -3178,7 +3182,7 @@ img {
   }
   
   .contact-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 2.5rem;
   }
 }
@@ -3230,16 +3234,15 @@ img {
   }
 }
 
-@media (max-width: 768px) {
-  .container {
-    padding-inline: 1.25rem;
-  }
-
+/* The nine inline nav links plus both CTAs need ~1050px of room; below that the
+   row used to overflow the viewport, so the off-canvas menu takes over here
+   rather than at the 768px content breakpoint. */
+@media (max-width: 1050px) {
   /* Sticky Navigation */
   .mobile-toggle {
     display: block;
   }
-  
+
   .nav-links {
     position: fixed;
     top: 4.75rem;
@@ -3258,11 +3261,11 @@ img {
     z-index: 999;
     overflow-y: auto;
   }
-  
+
   .nav-links.active {
     left: 0;
   }
-  
+
   .nav-links a {
     font-weight: 700;
     width: 100%;
@@ -3270,7 +3273,7 @@ img {
     padding-block: 0.65rem;
     border-radius: var(--radius-md);
   }
-  
+
   .nav-links a.active::after {
     display: none;
   }
@@ -3280,9 +3283,15 @@ img {
     background: rgba(56, 189, 248, 0.1);
     color: var(--color-accent);
   }
-  
+
   .btn-say-hello {
     display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-inline: 1.25rem;
   }
 
   .btn-resume-cta {
@@ -3622,8 +3631,15 @@ img {
     border-radius: 10px;
   }
 
-  .info-card-details a {
-    word-break: break-all;
+  /* Long e-mail / profile URLs wrap onto a second line instead of being
+     truncated to an ellipsis on the narrow single-column layout */
+  .info-card-details a,
+  .info-card-details p {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
   }
 
   .copy-btn {
